@@ -8,15 +8,16 @@ License: GPL
 Haskell functionality for reading and writing ASCII minor planet (e.g.
 asteroid) databases.
 
-The Minor Planet Center's
-[http://www.minorplanetcenter.net/iau/ECS/MPCAT-OBS/MPCAT-OBS.html](observations
-databases) are supported as much as I could figure out their format.  The
-[ftp://ftp.lowell.edu/pub/elgb/astorb.html](Lowell Observatory's asteroid
-orbits database) should be supported fairly well.
+The Minor Planet Center's [observations
+databases](http://www.minorplanetcenter.net/iau/ECS/MPCAT-OBS/MPCAT-OBS.html)
+are supported as much as I could figure out their format.  The [Lowell
+Observatory's asteroid orbits
+database](ftp://ftp.lowell.edu/pub/elgb/astorb.html) should be supported fairly
+well.
 
 The creation and maintenance of this package has nothing to do with the Minor
-Planet Center, the Lowell Observatory, or NASA.  It was written for
-[http://larouchepac.com/](LaRouche PAC), and the LaRouche Policy Institute.
+Planet Center, the Lowell Observatory, or NASA.  It was written for [LaRouche
+PAC](http://larouchepac.com/), and the LaRouche Policy Institute.
 
 
 # Reading Examples
