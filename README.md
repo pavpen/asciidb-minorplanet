@@ -10,10 +10,10 @@ asteroid) databases.
 
 The Minor Planet Center's [observations
 databases](http://www.minorplanetcenter.net/iau/ECS/MPCAT-OBS/MPCAT-OBS.html)
-are supported as much as I could figure out their format.  The [Lowell
-Observatory's asteroid orbits
-database](ftp://ftp.lowell.edu/pub/elgb/astorb.html) should be supported fairly
-well.
+are supported as much as I could figure out their format.  The Lowell
+Observatory's asteroid orbits database
+([ftp://ftp.lowell.edu/pub/elgb/astorb.html](ftp://ftp.lowell.edu/pub/elgb/astorb.html))
+should be supported fairly well.
 
 The creation and maintenance of this package has nothing to do with the Minor
 Planet Center, the Lowell Observatory, or NASA.  It was written for [LaRouche
