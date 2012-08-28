@@ -30,6 +30,7 @@ module Data.ASCII.MinorPlanetCenter.ProvisionalDesignations where
 import Data.ASCII.Get		(trimBS)
 import Data.Binary.Get		(getBytes)
 import qualified Data.ByteString.Char8 as Ch8
+import Data.Char		(isSpace)
 import Text.Printf		(printf)
 
 
@@ -137,8 +138,29 @@ showLong (SurveyT3Id {..}) = (show order) ++ " T-3"
 -- | Construct the provisional object designation from a non-packed string
 --   designation of the object.  (See
 --   <http://www.minorplanetcenter.net/iau/info/OldDesDoc.html>.)
-readLong str = procsRemStr $ dropWhile (== ' ') remStrRaw
+readLong str = procsRemStr $ dropWhile isSpace remStrRaw
   where (num, remStrRaw) = head $ ( (reads str) :: [(Int, String)] )
+        procsRemStr "P-L" = SurveyPLId { order = num }
+	procsRemStr "T-1" = SurveyT1Id { order = num }
+	procsRemStr "T-2" = SurveyT2Id { order = num }
+	procsRemStr "T-3" = SurveyT3Id { order = num }
+	procsRemStr [halfMoCh, ordCh] =
+		let (month, monthSecHalf) = chHalfMo halfMoCh
+		in MinorPlanetId { year = num, month, monthSecHalf,
+				   order = 1 + (ch2Num ordCh) }
+	procsRemStr (halfMoCh:ordCh:ordNumStr) =
+		let (month, monthSecHalf) = chHalfMo halfMoCh
+		in MinorPlanetId { year = num, month, monthSecHalf,
+			order = (read ordNumStr) * 25 + (ch2Num ordCh) + 1 }
+
+
+-- | Like 'readLong', but wrapped in a 'Maybe' to indicate possible parsing
+--   failure.
+mayReadLong str
+  | null lm1List = Nothing
+  | otherwise    = Just $ procsRemStr $ dropWhile isSpace remStrRaw
+  where lm1List = ( (reads str) :: [(Int, String)] )
+  	(num, remStrRaw) = head $ lm1List
         procsRemStr "P-L" = SurveyPLId { order = num }
 	procsRemStr "T-1" = SurveyT1Id { order = num }
 	procsRemStr "T-2" = SurveyT2Id { order = num }

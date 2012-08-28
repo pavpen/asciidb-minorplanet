@@ -28,6 +28,8 @@
 
 module Data.ASCII.LowellObservatory.AstOrb 
   ( Rec (..)
+  , getProvDesign
+  , setProvDesign
   , recSize
   , getRec
   , putRec
@@ -61,6 +63,7 @@ import Data.ASCII.LowellObservatory.ObjObservations
 				(ObjObservations (..), getObjObservations)
 import Data.ASCII.LowellObservatory.ObjDiscoverers
 				(ObjDiscoverers (..), getObjDiscoverers)
+import qualified Data.ASCII.MinorPlanetCenter.ProvisionalDesignations as PD
 import Data.ASCII.Put		(putFloatWithWidth, putJulianYYYYMMDD)
 
 
@@ -244,3 +247,7 @@ getRecs bs =
 	  True -> []
 	  _    -> let (recBS, bsTail) = LBS.splitAt recSize bs
 	  	  in (decode recBS):(getRecs bsTail)
+
+getProvDesign = PD.mayReadLong . designation
+
+setProvDesign rec pDesign = rec { designation = PD.showLong pDesign }
