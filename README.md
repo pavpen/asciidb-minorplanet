@@ -2,6 +2,7 @@ asciidb-minorplanet
 ===================
 
 (C) 2012 Pavel M. Penev
+
 License: GPL
 
 Haskell functionality for reading and writing ASCII minor planet (e.g.
@@ -18,9 +19,9 @@ Planet Center, the Lowell Observatory, or NASA.  It was written for
 [http://larouchepac.com/](LaRouche PAC), and the LaRouche Policy Institute.
 
 
-1. Reading Examples
+# Reading Examples
 
-1.1. Minor Planet Center's Databases
+## Minor Planet Center's Databases
 
 ```haskell
 import Data.Binary              (encode)
@@ -42,7 +43,8 @@ main = do
               (MPCObs.getMayRecs $ decompress bs)
 ```
 
-1.2. Lowell Observatory's Database
+
+## Lowell Observatory's Database
 
 ```haskell
 import Data.Binary              (encode)
@@ -55,7 +57,7 @@ import qualified Data.ASCII.LowellObservatory.AstOrb as AstOrb
 
 
 -- Read all records from the 'astorb.dat' database, and print ther Haskell
-representations, -- followed by their database representations:
+-- representations, followed by their database representations:
 main = do
         bs <- LBS.readFile "astorb.dat.gz"
         mapM_ (\r -> do putStrLn $ show r
