@@ -1,11 +1,6 @@
-{-# LANGUAGE NamedFieldPuns, NoMonomorphismRestriction, RecordWildCards #-}
-
-import Data.Binary		(Binary (..), Word8, decode, encode)
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Char8 as Ch8
+import Data.Binary		(decode, encode)
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LCh8
-import Data.Int			(Int32)
 import Codec.Compression.GZip	(decompress)
 
 import qualified Data.ASCII.MinorPlanetCenter.Obs as MPCObs

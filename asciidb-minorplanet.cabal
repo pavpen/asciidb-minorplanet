@@ -20,6 +20,11 @@ Library
   Hs-Source-Dirs:	src
   Exposed-Modules:	Data.ASCII.Get, Data.ASCII.Put,
                         Data.ASCII.LowellObservatory.AstOrb,
+                        Data.ASCII.LowellObservatory.ObjDiscoverers,
+                        Data.ASCII.LowellObservatory.ObjObservations,
+                        Data.ASCII.LowellObservatory.ObjSurveys,
+                        Data.ASCII.LowellObservatory.OrbitCrossings,
+                        Data.ASCII.LowellObservatory.OrbitUncertainties,
                         Data.ASCII.MinorPlanetCenter.Obs,
                         Data.ASCII.MinorPlanetCenter.Util,
                         Data.ASCII.MinorPlanetCenter.ProvisionalDesignations

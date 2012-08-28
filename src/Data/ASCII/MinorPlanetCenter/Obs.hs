@@ -35,7 +35,7 @@ module Data.ASCII.MinorPlanetCenter.Obs
   , mayGetRec
   , getRecs
   , getMayRecs
-  module Data.ASCII.MinorPlanetCenter.ProvisionalDesignations
+  , module Data.ASCII.MinorPlanetCenter.ProvisionalDesignations
   ) where
 
 

@@ -10,7 +10,8 @@ all: .capri
 		old-locale \
 		filepath old-time unix directory pretty process Cabal \
 		safe \
-		text
+		text time
+	capri import ../..
 
 dist-clean:
 	rm -Rf dist .capri

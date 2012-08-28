@@ -4,3 +4,9 @@ cabal-dev
 *.hi
 *.chi
 *.chs.h
+.capri
+NumObs.txt.gz
+UnnObs.txt.gz
+astorb.dat
+astorb.dat.gz
+*.swp
