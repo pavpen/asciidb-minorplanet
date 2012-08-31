@@ -19,6 +19,8 @@
 
 module Database.Persist.MinorPlanetCenter where
 
+import Data.ASCII.MinorPlanetCenter.Note2
+					(readNote2W8)
 import qualified Data.ASCII.MinorPlanetCenter.Obs as MPCObs
 import qualified Data.ASCII.MinorPlanetCenter.ProvisionalDesignations as PD
 import Data.Time			(UTCTime)
@@ -56,7 +58,8 @@ fromDbEntity (SQLRec objNumber provDesign discovery note1 note2 time
 				_  -> Just $ PD.readPacked provDesign
 	, MPCObs.discovery = discovery
 	, MPCObs.note1 = toEnum $ fromIntegral note1
-	, MPCObs.note2 = toEnum $ fromIntegral note2
+	, MPCObs.j2000Adj = j2000Adj
+	, MPCObs.obsType = obsType
 	, MPCObs.time = time
 	, MPCObs.rightAscSec = rightAscSec
 	, MPCObs.declRad = declRad
@@ -65,6 +68,7 @@ fromDbEntity (SQLRec objNumber provDesign discovery note1 note2 time
 	, MPCObs.rfcCode = rfcCode
 	, MPCObs.observatoryCode = observatoryCode
 	}
+  where (j2000Adj, obsType) = readNote2W8 note2
 
 
 toDbEntity (MPCObs.Rec {..}) =
@@ -72,7 +76,7 @@ toDbEntity (MPCObs.Rec {..}) =
 		(maybe "" (\d -> PD.showPacked d) provDesign)
 		discovery
 		(fromIntegral $ fromEnum note1)
-		(fromIntegral $ fromEnum note2)
+		(fromIntegral $ fromEnum obsType)
 		time
 		rightAscSec
 		declRad

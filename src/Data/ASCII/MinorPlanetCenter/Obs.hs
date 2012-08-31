@@ -35,13 +35,14 @@ module Data.ASCII.MinorPlanetCenter.Obs
   , mayGetRec
   , getRecs
   , getMayRecs
+  , module Data.ASCII.MinorPlanetCenter.Note2
   , module Data.ASCII.MinorPlanetCenter.ProvisionalDesignations
   ) where
 
 
 import Data.Binary		(Binary (..), decode, get)
 import Data.Binary.Get		(getBytes, getByteString, getLazyByteString,
-				 getWord8, isEmpty, runGet)
+				 getWord8, isEmpty, runGet, uncheckedSkip)
 import Data.Binary.Put		(putByteString, putWord8)
 import qualified Data.ByteString.Char8 as Ch8
 import qualified Data.ByteString.Lazy as LBS
@@ -52,6 +53,8 @@ import Text.Printf		(printf)
 import Data.ASCII.Get		(readWithWidth, readWithWidthDeflt,
 				 mayReadWithWidth, getEnumWord8,
 				 getStrWithWidth, getTrimmedStrWithWidth)
+import Data.ASCII.MinorPlanetCenter.Note2
+				(ObsType (..), getNote2)
 import Data.ASCII.MinorPlanetCenter.ProvisionalDesignations
 				(ProvDesign (..))
 import qualified Data.ASCII.MinorPlanetCenter.ProvisionalDesignations as PD
@@ -66,7 +69,8 @@ data Rec = Rec
 	, provDesign :: Maybe ProvDesign
 	, discovery :: Bool
 	, note1 :: Char
-	, note2 :: Char
+	, j2000Adj :: Bool
+	, obsType :: ObsType
 	, time :: UTCTime
 	, rightAscSec :: Double
 	, declRad :: Double
@@ -87,7 +91,7 @@ putRec (Rec {..}) = do
 		maybe "       " (\d -> PD.showPacked d) provDesign
 	putWord8 $ if discovery then 42 else 32 -- '*' or ' '
 	putWord8 $ fromIntegral $ fromEnum note1
-	putWord8 $ fromIntegral $ fromEnum note2
+	putWord8 $ fromIntegral $ fromEnum obsType
 	putTime time
 	putRightAscSec rightAscSec
 	putDeclRad declRad
@@ -108,7 +112,7 @@ getRec = do
 	discoveryBs <- getWord8
 	let discovery = discoveryBs == 42
 	note1 <- getEnumWord8
-	note2 <- getEnumWord8
+	(j2000Adj, obsType) <- getNote2
 	time <- getTime
 	rightAscSec <- getRightAscSec
 	declRad <- getDeclRad
@@ -118,6 +122,7 @@ getRec = do
 	_ <- getWord8
 	rfcCode <- getStrWithWidth 5
 	observatoryCode <- getTrimmedStrWithWidth 3
+	uncheckedSkip 1 -- Skip the terminating '\n'.
 	return Rec {..}
 
 mayGetRec = do
@@ -126,7 +131,7 @@ mayGetRec = do
 	discoveryBs <- getWord8
 	let discovery = discoveryBs == 42
 	note1 <- getEnumWord8
-	note2 <- getEnumWord8
+	(j2000Adj, obsType) <- getNote2
 	time <- getTime
 	rightAscSecM <- mayGetRightAscSec
 	maybe (return Nothing)

@@ -25,6 +25,8 @@ Library
                         Data.ASCII.LowellObservatory.ObjSurveys,
                         Data.ASCII.LowellObservatory.OrbitCrossings,
                         Data.ASCII.LowellObservatory.OrbitUncertainties,
+                        Data.ASCII.MinorPlanetCenter.Note1,
+                        Data.ASCII.MinorPlanetCenter.Note2,
                         Data.ASCII.MinorPlanetCenter.Obs,
                         Data.ASCII.MinorPlanetCenter.Util,
                         Data.ASCII.MinorPlanetCenter.ProvisionalDesignations,

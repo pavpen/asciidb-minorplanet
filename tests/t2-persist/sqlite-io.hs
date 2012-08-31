@@ -17,7 +17,8 @@ tRec = MPCObs.Rec
 	, MPCObs.provDesign = Just $ PD.SurveyT3Id 4
 	, MPCObs.discovery = False
 	, MPCObs.note1 = ' '
-	, MPCObs.note2 = ' '
+	, MPCObs.j2000Adj = False
+	, MPCObs.obsType = MPCObs.ReplacedObs False
 	, MPCObs.time = UTCTime (fromGregorian 2012 08 30)
 				(secondsToDiffTime 3600)
 	, MPCObs.rightAscSec = 1
@@ -35,3 +36,6 @@ main = do
 	  recId <- insert $ MPCDb.toDbEntity tRec
 	  dbRec <- get recId
 	  liftIO $ print dbRec
+	  maybe (return ())
+	  	(\r -> liftIO $ print $ MPCDb.fromDbEntity r)
+		dbRec
