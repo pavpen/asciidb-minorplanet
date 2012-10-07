@@ -9,12 +9,19 @@ Description:	A set of functions for parsing minor planet (e.g. asteroid)
                 Lowell Observatory's asteroid orbits database
                 (<ftp://ftp.lowell.edu/pub/elgb/astorb.html>) should be
                 supported fairly well.
+Synopsis:	Parse database files from the Minor Planet Center and the
+                Lowell Observatory
 License:	GPL
 Category:	Data
 Build-Type:	Simple
-Cabal-Version:	>= 1.2
+Cabal-Version:	>= 1.6
 
 Author:		Pavel M. Penev <pavpen@gmail.com>
+Maintainer:	Pavel M. Penev <pavpen@gmail.com>
+
+Source-Repository head
+  Type:		git
+  Location:	git://github.com/pavpen/asciidb-minorplanet.git
 
 Library
   Hs-Source-Dirs:	src
@@ -28,9 +35,20 @@ Library
                         Data.ASCII.MinorPlanetCenter.Note1,
                         Data.ASCII.MinorPlanetCenter.Note2,
                         Data.ASCII.MinorPlanetCenter.Obs,
+                        Data.ASCII.MinorPlanetCenter.Observatory,
+                        Data.ASCII.MinorPlanetCenter.Observer,
                         Data.ASCII.MinorPlanetCenter.Util,
                         Data.ASCII.MinorPlanetCenter.ProvisionalDesignations,
+                        Data.Conversion,
                         Database.Persist.MinorPlanetCenter
-  Build-Depends:	base, attoparsec, binary >= 0.5.1.0,
-                        bytestring >= 0.9.2.1, persistent >= 1.0.0,
-                        persistent-template >= 1.0.0, safe, time >= 1.4.0.1
+  Build-Depends:	base,
+                        attoparsec,
+                        binary >= 0.5.1.0,
+                        bytestring >= 0.9.2.1,
+                        monad-loops,
+                        groundhog,
+                        groundhog-th,
+                        groundhog-sqlite,
+                        safe,
+                        time >= 1.4.0.1
+                     --   template-haskell < 2.8.0.0

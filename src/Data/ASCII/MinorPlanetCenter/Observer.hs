@@ -91,10 +91,10 @@ data Observer = OpticalObs	    { obsData :: ObsData }
 	      | MicrometerObs	    { obsData :: ObsData }
 	      | RovingObserverObs   { obsData :: ObsData }
 	      | RadarObs	    { sigSrcObservatory :: Observatory
-	      			    , sigTimeDelayMuS :: Double
-				    , sigTimeDelayErrMuS :: Double
-				    , dopplerShiftHz :: Double
-				    , dopplerShiftErrHz :: Double
+	      			    , sigTimeDelayMuS :: Maybe Double
+				    , sigTimeDelayErrMuS :: Maybe Double
+				    , dopplerShiftHz :: Maybe Double
+				    , dopplerShiftErrHz :: Maybe Double
 				    , sigFreqHz :: Double
 				    , sigReturnPt :: SigReturnPt
 				    , obsRfcCode :: String
@@ -121,6 +121,7 @@ mkFromInt  80 = PhotographicObs		    -- 'P'
 mkFromInt 101 = EncoderObs		    -- 'e'
 mkFromInt  67 = CCDObs			    -- 'C'
 mkFromInt  84 = MeridianOrTransitCircObs    -- 'T'
+mkFromInt  77 = MicrometerObs		    -- 'M'
 mkFromInt  86 = RovingObserverObs	    -- 'V'
 mkFromInt 118 = RovingObserverObs	    -- 'v'
 mkFromInt  82 = RadarObs		    -- 'R'
@@ -143,6 +144,7 @@ obsTypeNum (PhotographicObs {..})		=  80 -- 'P'
 obsTypeNum (EncoderObs {..})			= 101 -- 'e'
 obsTypeNum (CCDObs {..})			=  67 -- 'C'
 obsTypeNum (MeridianOrTransitCircObs {..})	=  84 -- 'T'
+obsTypeNum (MicrometerObs {..})			=  77 -- 'M'
 obsTypeNum (RovingObserverObs {..})		=  86 -- 'V'
 obsTypeNum (RadarObs {..})			=  82 -- 'R'
 obsTypeNum (SatelliteObs {..})			=  83 -- 'S'

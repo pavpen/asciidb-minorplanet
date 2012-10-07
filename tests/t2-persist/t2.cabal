@@ -12,6 +12,13 @@ Author:		Pavel M. Penev <pavpen@gmail.com>
 Executable sqlite-io
   Main-is:		sqlite-io.hs
   Build-Depends:	base, binary >= 0.5.1.0, bytestring >= 0.9.2.1,
-                        persistent >= 1.0.0, persistent-sqlite >= 1.0.0, safe,
+                        groundhog, groundhog-sqlite, safe,
+                        time >= 1.4.0.1, transformers, zlib >= 0.5.3.3,
+                        asciidb-minorplanet
+
+Executable mpcobs-to-sqlite
+  Main-is:		mpcobs-to-sqlite.hs
+  Build-Depends:	base, binary >= 0.5.1.0, bytestring >= 0.9.2.1,
+                        groundhog, groundhog-sqlite, safe,
                         time >= 1.4.0.1, transformers, zlib >= 0.5.3.3,
                         asciidb-minorplanet

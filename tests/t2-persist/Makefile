@@ -1,7 +1,9 @@
 NAME = t2
 
-all: .capri
-	capri install
+PKG_MGR=cabal-dev
+#PKG_MGR=capri
+
+all: .$(PKG_MGR)-install
 
 .capri:
 	capri bootstrap
@@ -13,5 +15,14 @@ all: .capri
 		text time
 	capri import ../..
 
+.capri-install: .capri
+	capri install
+
+cabal-dev:
+	#cabal-dev add-source ../..
+
+.cabal-dev-install:
+	cabal-dev install . ../..
+
 dist-clean:
-	rm -Rf dist .capri
+	rm -Rf dist .capri cabal-dev

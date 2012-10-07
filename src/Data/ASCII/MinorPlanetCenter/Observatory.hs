@@ -40,3 +40,4 @@ data Observatory = ObservatoryCode { obsCode :: String }
 observatoryGetCode :: Observatory -> String
 observatoryGetCode (ObservatoryCode {..}) | null obsCode = "   "
 					  | otherwise    = obsCode
+observatoryGetCode (RovingObserver {..}) = "247"

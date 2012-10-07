@@ -1,17 +1,27 @@
 NAME = t1
 
-all: .capri
-	capri install
+PKG_MGR=cabal-dev
+#PKG_MGR=capri
+
+all: .$(PKG_MGR)-install
 
 .capri:
 	capri bootstrap
-	capri clone bytestring zlib \
-		array deepseq containers binary \
+	capri clone array deepseq time bytestring zlib containers binary \
 		old-locale \
 		filepath old-time unix directory pretty process Cabal \
 		safe \
-		text time
+		text
 	capri import ../..
 
+.capri-install: .capri
+	capri install
+
+cabal-dev:
+	#cabal-dev add-source ../..
+
+.cabal-dev-install: cabal-dev
+	cabal-dev install . ../..
+
 dist-clean:
-	rm -Rf dist .capri
+	rm -Rf dist .capri cabal-dev

@@ -53,7 +53,7 @@ data ProvDesign = MinorPlanetId { year :: Int
 				, order :: Int
 				, status :: Char
 				, fragment :: Char }
-		deriving (Show)
+		deriving (Eq, Show)
 
 
 -- | Calculate the letter corresponding to given number, omitting 'I', as used

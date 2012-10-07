@@ -18,6 +18,7 @@ import Data.Binary.Put		(putByteString, putWord8)
 import qualified Data.ByteString.Char8 as Ch8
 import Data.Time.Calendar.Julian
 				(toJulian)
+import Control.Monad		(foldM_)
 import Text.Printf		(printf)
 
 
@@ -41,6 +42,22 @@ putFloatWithWidth width num
 	decNum :: Integer
 	decNum = round $ decPart * 10**(fromIntegral decLen)
 	decNumStr = show decNum
+
+num2AlNumW8 n | n >= 0 && n <= 9 = n + 48	-- '0' to '9'
+	      | n >= 10 && n <= 35 = n + 55	-- 'A' to 'Z'
+	      | otherwise = error $ "AlNum digit out of range: " ++ (show n)
+
+putAlNumWithWidth width num | width < 1 = return ()
+			    | otherwise = do	
+	let dgtFactor = 10 ^ (width - 1)
+	let (dgt, remNum) = num `divMod` dgtFactor
+	putWord8 $ fromIntegral $ num2AlNumW8 dgt
+  	putRest remNum (dgtFactor `div` 10) (width - 1)
+  where putRest _ _ 0		    = return ()
+  	putRest num dgtFactor width = do
+		let (dgt, remNum) = num `divMod` dgtFactor
+		putWord8 $ fromIntegral $ num2AlNumW8 dgt
+		putRest remNum (dgtFactor `div` 10) (width - 1)
 
 putJulianYYYYMMDD day = putByteString $ Ch8.pack $ printf "%04d%02d%02d" y m d
   where (y, m, d) = toJulian day
