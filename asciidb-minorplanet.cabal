@@ -40,7 +40,9 @@ Library
                         Data.ASCII.MinorPlanetCenter.Util,
                         Data.ASCII.MinorPlanetCenter.ProvisionalDesignations,
                         Data.Conversion,
-                        Database.Persist.MinorPlanetCenter
+                        Database.Persist.MinorPlanetCenter,
+                        Database.Persist.MinorPlanetCenter.DbTypes,
+                        Database.Persist.MinorPlanetCenter.Selectors
   Build-Depends:	base,
                         attoparsec,
                         binary >= 0.5.1.0,

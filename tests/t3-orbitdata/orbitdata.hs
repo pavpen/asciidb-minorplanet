@@ -15,8 +15,9 @@ import Data.List			(isSuffixOf)
 import Data.Time.Clock			(UTCTime (..), secondsToDiffTime)
 import Data.Time.Calendar		(fromGregorian)
 import Database.Groundhog		(PersistEntity (..), (==.), (&&.),
-					 runMigration, defaultMigrationLogger,
-					 get, insert, select, selectAll)
+					 (||.), runMigration,
+					 defaultMigrationLogger, get, insert,
+					 select, selectAll)
 import Database.Groundhog.Sqlite	(runSqliteConn, withSqliteConn)
 import qualified Database.Persist.MinorPlanetCenter as MPCDb
 import System.Environment		(getProgName, getArgs)
@@ -33,7 +34,8 @@ main = do
 			 | otherwise = id
 	bs <- LBS.readFile inpFPath
 	let inpRecs = AstOrb.getRecs $ decompressor bs
-	withSqliteConn "../t2-persist/db/t1.sqlite" $ runSqliteConn $ do
+	withSqliteConn "../t2-persist/db/mpcobs-discov.sqlite" $ runSqliteConn $
+	 do
 	  runMigration defaultMigrationLogger MPCDb.migrateAll
 	  mapM_ procsRec inpRecs
   where procsRec rec = do
@@ -45,6 +47,8 @@ main = do
 	    do let pd = MPCDb.toDbProvDesign $ PD.readLong designation
 	       recs <- select $ MPCDb.DbRecDbProvDesign ==. Just pd &&.
 	       			MPCDb.DbRecDiscovery ==. True
+	       liftIO $ putStrLn $ "Discovery recs: "
+	       liftIO $ mapM_ (print . encode . MPCDb.fromDbRec) recs
 	       return $ head recs
 	  | otherwise =
 	    do recs <- select $ MPCDb.DbRecObjNumber ==. objNumber &&.
