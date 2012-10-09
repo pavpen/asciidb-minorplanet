@@ -1,0 +1,17 @@
+Name:		t4
+Version:	0.0
+Stability:	experimental
+Description:	Transfer the observation of each minor planet into an ACID
+                database.
+License:	GPL
+Build-Type:	Simple
+Cabal-Version:	>= 1.2
+
+Author:		Pavel M. Penev <pavpen@gmail.com>
+
+Executable mpcobs-initial-acid
+  Main-is:		mpcobs-initial-acid.hs
+  Build-Depends:	base, binary >= 0.5.1.0, bytestring >= 0.9.2.1,
+                        acid-state, containers, mtl, safe, safecopy,
+                        time >= 1.4.0.1, transformers, vector, zlib >= 0.5.3.3,
+                        asciidb-minorplanet

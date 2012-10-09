@@ -23,8 +23,15 @@ Executable mpcobs-to-sqlite
                         time >= 1.4.0.1, transformers, zlib >= 0.5.3.3,
                         asciidb-minorplanet
 
-Executable mpcobs-discov-to-sqlite
-  Main-is:		mpcobs-discov-to-sqlite.hs
+Executable mpcobs-filtered-to-sqlite
+  Main-is:		mpcobs-filtered-to-sqlite.hs
+  Build-Depends:	base, binary >= 0.5.1.0, bytestring >= 0.9.2.1,
+                        groundhog, groundhog-sqlite, safe,
+                        time >= 1.4.0.1, transformers, zlib >= 0.5.3.3,
+                        asciidb-minorplanet
+
+Executable mpcobs-initial-to-sqlite
+  Main-is:		mpcobs-initial-to-sqlite.hs
   Build-Depends:	base, binary >= 0.5.1.0, bytestring >= 0.9.2.1,
                         groundhog, groundhog-sqlite, safe,
                         time >= 1.4.0.1, transformers, zlib >= 0.5.3.3,

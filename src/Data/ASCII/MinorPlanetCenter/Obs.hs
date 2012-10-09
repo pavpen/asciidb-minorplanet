@@ -1,4 +1,5 @@
-{-# LANGUAGE FlexibleInstances, NamedFieldPuns, RecordWildCards #-}
+{-# LANGUAGE DeriveDataTypeable, FlexibleInstances, NamedFieldPuns,
+    RecordWildCards #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -60,7 +61,8 @@ import Data.ASCII.Get		(readWithWidth, readWithWidthDeflt,
 				 mayGetFloatImplFPWithWidth,
 				 getDecFracWithWidth', getAlNumWithWidthDeflt)
 import Data.ASCII.MinorPlanetCenter.Observer
-				(Observer (..), ObsData (..), SatObsUnitsToUse,
+				(Observer (..), ObsData (..),
+				 SatObsUnitsToUse (..), SigReturnPt (..),
 				 obsTypeNum, note2W8GetJ2000Adj, getObsData,
 				 putObsData)
 import Data.ASCII.MinorPlanetCenter.Observatory
@@ -74,6 +76,7 @@ import Data.ASCII.MinorPlanetCenter.Util
 				 mayGetRightAscSec, mayGetDeclRad)
 import Data.ASCII.Put		(putFloatWithWidth, putAlNumWithWidth)
 import Data.Conversion		(SIConvertible (..))
+import Data.Typeable		(Typeable)
 
 
 data Rec = Rec
@@ -85,7 +88,7 @@ data Rec = Rec
 	, time :: UTCTime
 	, observer :: Observer
 	, observatory :: Observatory
-	} deriving (Show, Eq)
+	} deriving (Eq, Show, Typeable)
 
 
 recSize = 81
