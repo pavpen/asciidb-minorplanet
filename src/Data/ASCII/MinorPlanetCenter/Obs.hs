@@ -34,6 +34,7 @@ module Data.ASCII.MinorPlanetCenter.Obs
   , putRec
   , getRec
   , getRecs
+  , module Data.ASCII.MinorPlanetCenter.Obj
   , module Data.ASCII.MinorPlanetCenter.Observer
   , module Data.ASCII.MinorPlanetCenter.Observatory
   , module Data.ASCII.MinorPlanetCenter.ProvisionalDesignations
@@ -60,6 +61,8 @@ import Data.ASCII.Get		(readWithWidth, readWithWidthDeflt,
 				 getFloatWithWidth, getFloatImplFPWithWidth,
 				 mayGetFloatImplFPWithWidth,
 				 getDecFracWithWidth', getAlNumWithWidthDeflt)
+import Data.ASCII.MinorPlanetCenter.Obj
+				(Design (..), Designatable (..))
 import Data.ASCII.MinorPlanetCenter.Observer
 				(Observer (..), ObsData (..),
 				 SatObsUnitsToUse (..), SigReturnPt (..),
@@ -89,6 +92,12 @@ data Rec = Rec
 	, observer :: Observer
 	, observatory :: Observatory
 	} deriving (Eq, Show, Typeable)
+
+instance Designatable Rec where
+  getDesign (Rec { objNumber=(-1), provDesign=(Just pd)}) = DesignProv pd
+  getDesign rec@(Rec { objNumber })
+    | objNumber /= -1 = DesignNum objNumber
+    | otherwise       = error $ "getDesign: Undesignatable object: "++(show rec)
 
 
 recSize = 81

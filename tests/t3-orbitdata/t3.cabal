@@ -15,3 +15,10 @@ Executable orbitdata
                         groundhog, groundhog-sqlite, safe,
                         time >= 1.4.0.1, transformers, zlib >= 0.5.3.3,
                         asciidb-minorplanet
+
+Executable orbitdata-zip
+  Main-is:		orbitdata-zip.hs
+  Build-Depends:	base, binary >= 0.5.1.0, bytestring >= 0.9.2.1,
+                        groundhog, groundhog-sqlite, safe,
+                        time >= 1.4.0.1, transformers, zlib >= 0.5.3.3,
+                        asciidb-minorplanet

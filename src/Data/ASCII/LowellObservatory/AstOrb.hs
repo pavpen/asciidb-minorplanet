@@ -1,4 +1,4 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE NamedFieldPuns, RecordWildCards #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -63,6 +63,8 @@ import Data.ASCII.LowellObservatory.ObjObservations
 				(ObjObservations (..), getObjObservations)
 import Data.ASCII.LowellObservatory.ObjDiscoverers
 				(ObjDiscoverers (..), getObjDiscoverers)
+import Data.ASCII.MinorPlanetCenter.Obj
+				(Design (..), Designatable (..))
 import qualified Data.ASCII.MinorPlanetCenter.ProvisionalDesignations as PD
 import Data.ASCII.Put		(putFloatWithWidth, putJulianYYYYMMDD)
 
@@ -103,6 +105,11 @@ data Rec = Rec
 	, peu10yRad :: Double				-- 25. "F7.2", "X1"
 	, peu10yDate :: Day				--     "I4,2I2"
 	} deriving (Show, Eq)
+
+instance Designatable Rec where
+  getDesign (Rec { objNumber, designation })
+    | objNumber == -1 = DesignProv $ PD.readLong designation
+    | otherwise       = DesignNum objNumber
 
 recSize = 268
 
