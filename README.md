@@ -41,7 +41,7 @@ main = do
         bs <- LBS.readFile "UnnObs.txt.gz"
         mapM_ (\r -> do putStrLn $ show r
                         LCh8.putStrLn $ encode r)
-              (MPCObs.getMayRecs $ decompress bs)
+              (MPCObs.getRecs $ decompress bs)
 ```
 
 
