@@ -30,7 +30,8 @@
 
 module Data.ASCII.MinorPlanetCenter.Obs
   ( Rec (..)
-  , recSize
+  , chunkSize
+  , recGetChunkCnt
   , putRec
   , getRec
   , getRecs
@@ -100,7 +101,12 @@ instance Designatable Rec where
     | otherwise       = error $ "getDesign: Undesignatable object: "++(show rec)
 
 
-recSize = 81
+chunkSize = 81
+
+recGetChunkCnt (Rec {observer = RovingObserverObs {..}}) = 2
+recGetChunkCnt (Rec {observer = RadarObs {..}}) = 2
+recGetChunkCnt (Rec {observer = SatelliteObs {..}}) = 2
+recGetChunkCnt _ = 1
 
 
 putRecObserv (Rec { objNumber
@@ -571,7 +577,7 @@ getMayRecs :: LBS.ByteString -> [Rec]
 getMayRecs bs =
 	case LBS.null bs of
 	  True -> []
-	  _    -> let (rec, recTail) = LBS.splitAt recSize bs
+	  _    -> let (rec, recTail) = LBS.splitAt chunkSize bs
 	  	      recsTail = getMayRecs recTail
 	          in maybe recsTail
 		  	   (\rec -> rec:(recsTail))
