@@ -11,6 +11,6 @@ Author:		Pavel M. Penev <pavpen@gmail.com>
 
 Executable verify-rec-order
   Main-is:		verify-rec-order.hs
-  Build-Depends:	base, binary >= 0.5.1.0, bytestring >= 0.9.2.1, safe,
-                        time >= 1.4.0.1, transformers, zlib >= 0.5.3.3,
+  Build-Depends:	base, binary >= 0.5.1.0, bytestring >= 0.9.2.1,
+                        time >= 1.4.0.1, zlib >= 0.5.3.3,
                         asciidb-minorplanet

@@ -4,7 +4,6 @@
 
 import Codec.Compression.GZip		(decompress)
 import Control.Monad			(forM_)
-import Control.Monad.IO.Class		(liftIO)
 import qualified Data.ASCII.LowellObservatory.AstOrb as AstOrb
 import qualified Data.ASCII.MinorPlanetCenter.Obs as MPCObs
 import qualified Data.ASCII.MinorPlanetCenter.ProvisionalDesignations as PD
@@ -18,12 +17,8 @@ import Data.Time.Clock.POSIX		(utcTimeToPOSIXSeconds)
 import Data.Time.Calendar		(fromGregorian)
 import qualified Database.Persist.MinorPlanetCenter as MPCDb
 import System.Environment		(getProgName, getArgs)
-import System.IO			(stderr, hPutStrLn)
-import Text.Printf			(printf)
+import System.IO			(stderr, hPutStr, hPutStrLn)
 
-
-domineT = UTCTime (fromGregorian 1 1 1) (secondsToDiffTime 0)
-epochT = UTCTime (fromGregorian 2000 1 1) (secondsToDiffTime $ 12 * 3600)
 
 readDecomprFile path = do
 	bs <- LBS.readFile path
@@ -41,21 +36,21 @@ filterNumObs recs = doFilter (MPCObs.DesignNum (-1)) recs
 
 verifyNumObs (rec:[]) lnNum = do
 	putStrLn $ "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bLine: " ++ (show lnNum) ++ "."
-	hPutStrLn stderr $ "verifyNumObs: OK."
+	hPutStrLn stderr $ "verifyNumObs: Done."
 verifyNumObs (pRec:restRecs@(nRec:_)) lnNum
   | MPCObs.objNumber pRec == MPCObs.objNumber nRec = testTime
   | MPCObs.objNumber pRec <  MPCObs.objNumber nRec = passTest
   | otherwise                                      = do
       hPutStrLn stderr $ "verifyNumObs: Bad 'objNumber' order on line " ++
       			  (show lnNum) ++ "!"
-      hPutStrLn stderr $ LCh8.unpack $ encode pRec
+      hPutStr   stderr $ LCh8.unpack $ encode pRec
       hPutStrLn stderr $ LCh8.unpack $ encode nRec
       passTest
   where testTime | MPCObs.time pRec <= MPCObs.time nRec = passTest
   		 | otherwise                            = do
 		     hPutStrLn stderr $"verifyNumObs: Bad 'time' order on line "
 		    			++ (show lnNum) ++ "!"
-		     hPutStrLn stderr $ LCh8.unpack $ encode pRec
+		     hPutStr   stderr $ LCh8.unpack $ encode pRec
 		     hPutStrLn stderr $ LCh8.unpack $ encode nRec
 		     passTest
 	passTest = do
@@ -64,7 +59,7 @@ verifyNumObs (pRec:restRecs@(nRec:_)) lnNum
 
 verifyUnnObs (rec:[]) lnNum = do
 	putStrLn $ "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bLine: " ++ (show lnNum) ++ "."
-	hPutStrLn stderr $ "verifyUnnObs: OK."
+	hPutStrLn stderr $ "verifyUnnObs: Done."
 verifyUnnObs (pRec:restRecs@(nRec:_)) lnNum
   | MPCObs.provDesign pRec == Nothing = do
       hPutStrLn stderr $ "verifyUnnObs: Nothing 'provDesign' on line "
@@ -85,7 +80,7 @@ verifyUnnObs (pRec:restRecs@(nRec:_)) lnNum
   		 | otherwise				= do
 		     hPutStrLn stderr $"verifyUnnObs: Bad 'time' order on line "
  					++ (show lnNum) ++ "!"
-		     hPutStrLn stderr $ LCh8.unpack $ encode pRec
+		     hPutStr   stderr $ LCh8.unpack $ encode pRec
 		     hPutStrLn stderr $ LCh8.unpack $ encode nRec
 		     passTest
 	testProvDesign pPD nPD
@@ -93,7 +88,7 @@ verifyUnnObs (pRec:restRecs@(nRec:_)) lnNum
 	  | otherwise				      = do
 	      hPutStrLn stderr $ "verifyUnnObs: Bad 'provDesign' order on line "
 	      			  ++ (show lnNum) ++ "!"
-	      hPutStrLn stderr $ LCh8.unpack $ encode pRec
+	      hPutStr   stderr $ LCh8.unpack $ encode pRec
 	      hPutStrLn stderr $ LCh8.unpack $ encode nRec
 	      passTest
 	passTest = do
