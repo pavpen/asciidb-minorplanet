@@ -1,0 +1,4 @@
+[From <ftp://ftp.lowell.edu/pub/elgb/astorb.html>:]
+Acknowledgment and Attribution The research and computing needed to generate astorb.dat were funded principally by NASA grant NAG5-4741, and in part by the Lowell Observatory endowment. astorb.dat may be freely used, copied, and transmitted provided attribution to Dr. Edward Bowell and the aforementioned funding sources is made. Hypertext links to this WWW site are welcome.
+
+Ted Bowell

@@ -1,0 +1,23 @@
+http://www.minorplanetcenter.net/iau/ECS/MPCAT-OBS/MPCAT-OBS.html
+	http://www.minorplanetcenter.net/iau/ECS/MPCAT-OBS/midmonth/NumObs.txt.gz
+	http://www.minorplanetcenter.net/iau/ECS/MPCAT-OBS/midmonth/UnnObs.txt.gz
+	http://www.minorplanetcenter.net/iau/ECS/MPCAT-OBS/CmtObs.txt.gz
+
+NumObs.txt:
+	82180971 observations
+	565446 discovery observations
+
+UnnObs.txt:
+	453986 discovery observations
+
+
+
+http://www.minorplanetcenter.net/iau/lists/MPLists.html /
+	http://www.minorplanetcenter.net/iau/lists/Atens.html
+	http://www.minorplanetcenter.net/iau/lists/Apollos.html
+	http://www.minorplanetcenter.net/iau/lists/Amors.html
+	http://www.minorplanetcenter.net/iau/lists/Centaurs.html
+	http://www.minorplanetcenter.net/iau/lists/TNOs.html
+	http://www.minorplanetcenter.net/iau/lists/Others.html
+	http://www.minorplanetcenter.net/iau/lists/Dangerous.html
+http://www.minorplanetcenter.net/iau/lists/StatsExplanation.html

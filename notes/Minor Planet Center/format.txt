@@ -1,0 +1,186 @@
+The format seems to be the following:
+(From <http://www.minorplanetcenter.net/iau/info/OpticalObs.html>):
+
+Columns: Format:	Content:
+1-5	 A5		'Minor planet number'. I.e. Minor Planet Center Object
+			ID (e.g.
+			http://www.minorplanetcenter.net/db_search/show_object?object_id=2)
+
+6-12	A7		Provisional or temporary designation. (Packed format.)
+			Assigned by the observer for new or unidentified
+			objects. Temporary designations must consist of
+			alphanumeric characters only: do not include spaces.
+			All observations of the same "new" object reported in
+			the same message must have the same temporary
+			designation.
+			
+			See
+			http://www.minorplanetcenter.net/iau/info/PackedDes.html,
+			and
+			http://www.minorplanetcenter.net/iau/info/OldDesDoc.html
+
+13	A1		Discovery asterisk
+
+14	A1		Note 1
+			See
+			http://www.minorplanetcenter.net/iau/info/ObsNote.html
+
+			Publishable Notes For Observations Of Minor Planets
+
+			Alphabetic note shown with some of the observations
+			are defined according to the scheme below.
+			Non-alphabetic codes are used to differentiate between
+			different programs at the same site and such codes
+			will be defined in the headings for the individual
+			observatories in the Minor Planet Circulars.
+
+			  A  earlier approximate position inferior
+			  a  sense of motion ambiguous
+			  B  bright sky/black or dark plate
+			  b  bad seeing
+			  c  crowded star field
+			  D  declination uncertain
+			  d  diffuse image
+			  E  at or near edge of plate
+			  F  faint image
+			  f  involved with emulsion or plate flaw
+			  G  poor guiding
+			  g  no guiding
+			  H  hand measurement of CCD image
+			  I  involved with star
+			  i  inkdot measured
+			  J  J2000.0 rereduction of previously-reported position
+			  K  stacked image
+			  k  stare-mode observation by scanning system
+			  M  measurement difficult
+			  m  image tracked on object motion
+			  N  near edge of plate, measurement uncertain
+			  O  image out of focus
+			  o  plate measured in one direction only
+			  P  position uncertain
+			  p  poor image
+			  R  right ascension uncertain
+			  r  poor distribution of reference stars
+			  S  poor sky
+			  s  streaked image
+			  T  time uncertain
+			  t  trailed image
+			  U  uncertain image
+			  u  unconfirmed image
+			  V  very faint image
+			  W  weak image
+			  w  weak solution
+
+			The following codes are also defined. These codes are
+			either restricted in their use (as indicated in the
+			description below) or MUST NOT be used on
+			newly-submitted observations.
+
+			  C  correction to earlier position
+			  Q  "quality" observation not measured using survey
+			     reduction code (used only for code E12)
+			  X  retained previously-published observation
+			     replaced by remeasured/corrected observation,
+			     usually discovery observation
+
+15	A1		Note 2
+			This column serves two purposes. For those
+			observations which have been converted to the J2000.0
+			system by rotating B1950.0 coordinates this column
+			contains `A', to indicate that the value has been
+			adjusted. For those observations reduced in the
+			J2000.0 system this column is used to indicate how the
+			observation was made. The following codes will be
+			used:
+
+		      P   Photographic (default if column is blank)
+		      e   Encoder
+		      C   CCD
+		      T   Meridian or transit circle
+		      M   Micrometer
+		     V/v  "Roving Observer" observation
+		     R/r  Radar observation
+		     S/s  Satellite observation
+		      c   Corrected-without-republication CCD observation
+		      E   Occultation-derived observations
+		      O   Offset observations (used only for observations of
+		          natural satellites)
+		      H   Hipparcos geocentric observations
+		      N   Normal place
+		      n   Mini-normal place derived from averaging
+		          observations from video frames
+
+			In addition, there are 'X' and 'x' which are used only
+			for already-filed observations. 'X' was given
+			originally only to discovery observations that were
+			approximate or semi-accurate and that had accurate
+			measures corresponding to the time of discovery: this
+			has been extended to other replaced discovery
+			observations. Observations marked 'X'/'x' are to be
+			suppressed in residual blocks. They are retained so
+			that there exists an original record of a discovery. 
+
+16-32			Date of observation
+			Columns 16-32 contain the date and UTC time of the
+			mid-point of observation. If the observation refers to
+			one end of a trailed image, then the time of
+			observation will be either the start time of the
+			exposure or the finish time of the exposure. The
+			format is "YYYY MM DD.dddddd", with the decimal day of
+			observation normally being given to a precision of
+			0.00001 days. Where such precision is justified, there
+			is the option of recording times to 0.000001 days. 
+
+33-44			Observed RA (J2000.0)
+			Columns 33-44 contain the observed J2000.0 right
+			ascension. The format is "HH MM SS.ddd", with the
+			seconds of R.A. normally being given to a precision of
+			0.01s. There is the option of recording the right
+			ascension to 0.001s, where such precision is
+			justified.
+
+45-56			Observed Decl. (J2000.0)
+			Columns 45-56 contain the observed J2000.0
+			declination. The format is "sDD MM SS.dd" (with "s"
+			being the sign), with the seconds of Decl. normally
+			being given to a precision of 0.1". There is the
+			option of recording the declination to 0".01, where
+			such precision is justified.
+
+57-65   9X		Circular number?
+			'Must be blank' (Although it's used sometimes.)
+
+66-71   F5.2,A1		Observed magnitude and band
+			(or nuclear/total flag for comets)
+			The observed magnitude (normally to a precision of 0.1
+			mag.) and the band in which the measurement was made.
+			The observed magnitude can be given to 0.01 mag.,
+			where such precision is justified. The default
+			magnitude scale is photographic, although magnitudes
+			may be given in V- or R-band, for example. For comets,
+			the magnitude must be specified as being nuclear, N,
+			or total, T.
+
+			The current list of acceptable magnitude bands is: B
+			(default if band is not indicated), V, R, I, J, W, U,
+			g, r, i and z. Non-recognized magnitude bands will
+			cause observations to be rejected. Addition of new
+			recognised bands requires knowledge of a standard
+			correction to convert a magnitude in that band to V.
+
+			The formerly-used "C" band to indicate "clear" or "no
+			filter" is no longer valid for newly-submitted
+			observations, but will remain on previously-submitted
+			observations.
+
+72	A1		?
+
+73-77	A5		Reference code
+			http://www.minorplanetcenter.net/iau/info/References.html
+
+78-80	A3		Observatory code
+			Lists of observatory codes
+			<http://www.minorplanetcenter.net/iau/lists/ObsCodes.html>
+			are published from time to time in the MPCs. Note that
+			new observatory codes are assigned only upon receipt
+			of acceptable astrometric observations. 
