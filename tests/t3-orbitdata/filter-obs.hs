@@ -67,7 +67,7 @@ mProcsRec (rNum, rec) nextRec
       LCh8.putStr $ encode rec
       return (rNum + 1, nextRec)
   where chosenRec | MPCObs.time rec <= MPCObs.time nextRec  = rec
-		   | otherwise = nextRec
+		  | otherwise = nextRec
 
 doProcsRecs' rNum (obsRec:restObsRecs) = do
 	LCh8.putStr $ encode obsRec

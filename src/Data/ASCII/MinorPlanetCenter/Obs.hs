@@ -31,6 +31,7 @@
 module Data.ASCII.MinorPlanetCenter.Obs
   ( Rec (..)
   , chunkSize
+  , note2Ofs
   , recGetChunkCnt
   , putRec
   , getRec
@@ -102,6 +103,7 @@ instance Designatable Rec where
 
 
 chunkSize = 81
+note2Ofs = 14
 
 recGetChunkCnt (Rec {observer = RovingObserverObs {..}}) = 2
 recGetChunkCnt (Rec {observer = RadarObs {..}}) = 2

@@ -1,0 +1,18 @@
+Mid-month updated <NumObs.txt.gz> downleaded on Oct. 10, 2012 had the
+following peruliar sequence of lines (75786601--75786609):
+
+N4145K00E70W  C2000 03 21.94290 11 41 50.72 +18 09 20.6          14.1  db2383145
+N4145K00E70W  C2000 03 21.94706 11 41 45.26 +18 11 58.8          14.0  db2383145
+N4145K00E70W  C2000 03 21.95167 11 41 39.27 +18 14 55.2          14.2  db2383145
+N4145K00E70W  C2000 03 21.95544 11 41 34.30 +18 17 19.6          14.3  db2383145
+N4145         R2000 03 22.113194               +    11500190   2380 251 JPLRS251
+N4145         R2000 03 22.113194               +    11500190   2380 251 JPLRS251
+N4145         r2000 03 22.113194C                        0300       251 JPLRS251
+N4145         R2000 03 22.181944               +    11037703   2380 251 JPLRS251
+N4145         r2000 03 22.181944C                        1000       251 JPLRS251
+
+The repeated radar observation line causes the present implementation of the
+parser to interpret it as the opening of container record.  All subsequent
+records were interpreted as nested within it, which caused a stack overflow
+when its parsing was attempted.  (Of course, there never was a matching 'r'
+line, which makes it an end-of-file error in a smaller file.)

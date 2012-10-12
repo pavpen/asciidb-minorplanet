@@ -9,16 +9,44 @@ Cabal-Version:	>= 1.2
 
 Author:		Pavel M. Penev <pavpen@gmail.com>
 
+
 Executable orbitdata
   Main-is:		orbitdata.hs
   Build-Depends:	base, binary >= 0.5.1.0, bytestring >= 0.9.2.1,
                         groundhog, groundhog-sqlite, safe,
                         time >= 1.4.0.1, transformers, zlib >= 0.5.3.3,
-                        asciidb-minorplanet
+                        asciidb-minorplanet, asciidb-minorplanet-groundhog
 
 Executable orbitdata-zip
   Main-is:		orbitdata-zip.hs
   Build-Depends:	base, binary >= 0.5.1.0, bytestring >= 0.9.2.1,
-                        groundhog, groundhog-sqlite, safe,
+                        time >= 1.4.0.1, transformers, zlib >= 0.5.3.3,
+                        asciidb-minorplanet
+  GHC-Options:		-threaded
+
+Executable orbitdata-zip-all
+  Main-is:		orbitdata-zip-all.hs
+  Build-Depends:	base, binary >= 0.5.1.0, bytestring >= 0.9.2.1,
+                        time >= 1.4.0.1, transformers, zlib >= 0.5.3.3,
+                        asciidb-minorplanet
+  GHC-Options:		-threaded
+
+Executable filter-obs
+  Main-is:		filter-obs.hs
+  Build-Depends:	base, binary >= 0.5.1.0, bytestring >= 0.9.2.1,
+                        time >= 1.4.0.1, transformers, zlib >= 0.5.3.3,
+                        asciidb-minorplanet
+  GHC-Options:		-O3 -threaded -rtsopts=all
+
+Executable filter-obs-parallel
+  Main-is:		filter-obs.hs
+  Build-Depends:	base, binary >= 0.5.1.0, bytestring >= 0.9.2.1,
+                        time >= 1.4.0.1, transformers, zlib >= 0.5.3.3,
+                        asciidb-minorplanet
+  GHC-Options:		-O3 -threaded -rtsopts=all
+
+Executable orbitdata-zip-filtered
+  Main-is:		orbitdata-zip-filtered.hs
+  Build-Depends:	base, binary >= 0.5.1.0, bytestring >= 0.9.2.1,
                         time >= 1.4.0.1, transformers, zlib >= 0.5.3.3,
                         asciidb-minorplanet

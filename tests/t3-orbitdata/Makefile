@@ -22,7 +22,7 @@ cabal-dev:
 	#cabal-dev add-source ../..
 
 .cabal-dev-install:
-	cabal-dev install . ../..
+	cabal-dev install . ../.. ../../asciidb-minorplanet-groundhog
 
 dist-clean:
 	rm -Rf dist .capri cabal-dev

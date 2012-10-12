@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, FlexibleContexts, GeneralizedNewtypeDeriving,
+{-# LANGUAGE BangPatterns, GADTs, FlexibleContexts, GeneralizedNewtypeDeriving,
     NamedFieldPuns, OverloadedStrings, QuasiQuotes, RecordWildCards,
     TemplateHaskell, TypeFamilies #-}
 
@@ -12,6 +12,7 @@ import Data.Binary			(encode)
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LCh8
 import Data.List			(isSuffixOf)
+import qualified Data.List as L
 import Data.Time.Clock			(UTCTime (..), secondsToDiffTime,
 					 diffUTCTime)
 import Data.Time.Clock.POSIX		(utcTimeToPOSIXSeconds)
@@ -38,7 +39,7 @@ readDecomprFile path = do
 
 useRecs (AstOrb.Rec {..}) (MPCObs.Rec {time}) = do
 	putStrLn $
-	  printf "{ %16.8f, %16.8f, %16.8f, %16.8f, %16.8f, %16.8f, %s }"
+	  printf "{ %16.8f, %16.8f, %16.8f, %16.8f, %16.8f, %16.8f, %s },"
 	  	 semiMajAAU ecc
 		 (inclRad * 180 / pi)
 		 (lngAscNodeRad * 180 / pi)
@@ -46,13 +47,41 @@ useRecs (AstOrb.Rec {..}) (MPCObs.Rec {time}) = do
 		 (meanAnomRad * 180 / pi)
 		 (show $ round $ time `diffUTCTime` epochT)
 
-filterNumObs recs = doFilter (MPCObs.DesignNum (-1)) recs
+filterTObs recs = doFilter domineT recs
+  where doFilter :: UTCTime -> [MPCObs.Rec] -> [MPCObs.Rec]
+  	doFilter _ [] = []
+  	doFilter lastT (lm:restLms)
+	  | lmT == lastT = doFilter lastT restLms
+	  | otherwise	 = lm:(doFilter lmT restLms)
+	  where lmT = MPCObs.time lm
+
+filterSortedObs recs = doFilter (MPCObs.DesignNum (-1)) recs
   where doFilter :: MPCObs.Design -> [MPCObs.Rec] -> [MPCObs.Rec]
   	doFilter _ [] = []
   	doFilter lastDesign (lm:restLms)
 	  | lmDesign == lastDesign = doFilter lastDesign restLms
 	  | otherwise		   = lm:(doFilter lmDesign restLms)
 	  where lmDesign = MPCObs.getDesign lm
+
+filterObs (rec:restRecs) = doFilter rec restRecs
+  where doFilter :: MPCObs.Rec -> [MPCObs.Rec] -> [MPCObs.Rec]
+  	doFilter lastLm [] = [lastLm]
+  	doFilter lastLm (lm:restLms)
+	  | lmDesign == lastDesign = doFilter (chooseLm lastLm lm) restLms
+	  | otherwise		   = lastLm:(doFilter lm restLms)
+	  where lmDesign = MPCObs.getDesign lm
+	  	lastDesign = MPCObs.getDesign lastLm
+	chooseLm lm1@(MPCObs.Rec {time=t1}) lm2@(MPCObs.Rec {time=t2})
+	  | t1 <= t2  = lm1
+	  | otherwise = lm2
+filterObs [] = []
+
+filterObs' recs = map reduceGrp grps
+  where grps = L.groupBy (\a b -> MPCObs.getDesign a == MPCObs.getDesign b) recs
+  	reduceGrp = foldr1 chooseLm
+	chooseLm lm1@(MPCObs.Rec {time=t1}) lm2@(MPCObs.Rec {time=t2})
+	  | t1 <= t2  = lm1
+	  | otherwise = lm2
 
 main = do
 	progName <- getProgName
@@ -63,23 +92,11 @@ main = do
 		[path]   -> (path, "../t1-read/NumObs.txt.gz")
 		_   -> ("../t1-read/astorb.dat.gz", "../t1-read/NumObs.txt.gz")
 	astOrbBs <- readDecomprFile astOrbFPath
-	numObsBs <- readDecomprFile numObsFPath
+	obsBs <- readDecomprFile numObsFPath
 	let astOrbRecs = AstOrb.getRecs astOrbBs
-	let numObsRecs = filterNumObs $ MPCObs.getRecs numObsBs
-	{-
-	withSqliteConn "../t2-persist/db/mpcobs-filtered-1.sqlite" $
-	 runSqliteConn $ do
-	  runMigration defaultMigrationLogger MPCDb.migrateAll
-	  -- mapM_ procsRec' inpRecs
-	  liftIO $ putStrLn $ "Reading numObsRecs."
-	  dbRecs <- selectAll
-	  liftIO $ putStrLn $ "Zipping astOrbRecs & numObsRecs."
-	  let numObsRecs = map (MPCDb.fromDbRec . snd) dbRecs
-	  liftIO $ mapM_ procsRec $ zip astOrbRecs $ numObsRecs
-	  -- return $ map (MPCDb.fromDbRec . snd) dbRecs
-	-}
-	hPutStrLn stderr $ "Zipping astOrbRecs & numObsRecs."
-	mapM_ procsRec $ zip astOrbRecs numObsRecs
+	let obsRecs = filterObs' $ MPCObs.getRecs obsBs
+	hPutStrLn stderr $ "Zipping astOrbRecs & obsRecs."
+	mapM_ procsRec $ zip astOrbRecs obsRecs
   where procsRec (astOrbRec, mpcObsRec)
   	  | MPCObs.getDesign astOrbRec == MPCObs.getDesign mpcObsRec = do
 	    -- hPutStrLn stderr $ (show astOrbRec)
@@ -88,33 +105,3 @@ main = do
 	    hPutStrLn stderr $ "Records with unmatching IDs:\n" ++
 	    	(LCh8.unpack $ encode astOrbRec) ++
 		(LCh8.unpack $ encode mpcObsRec)
-  	procsRec' rec@(AstOrb.Rec {..}) = do
-	  -- liftIO $ LCh8.putStrLn $ encode rec
-  	  obs@(MPCDb.DbRec { time }) <- getDiscovObs rec
-	  -- liftIO $ print obs
-	  liftIO $ putStrLn $ "{ " ++
-	  	(show semiMajAAU) ++ ", " ++
-	  	(show ecc) ++ ", " ++
-		(show $ inclRad * 180 / pi) ++ ", " ++
-		(show $ lngAscNodeRad * 180 / pi) ++ ", " ++
-		(show $ argPerihRad * 180 / pi) ++ ", " ++
-		(show $ meanAnomRad * 180 / pi) ++ ", " ++
-		(show $ round $ time `diffUTCTime` epochT) ++ " },"
-	getDiscovObs (AstOrb.Rec {..})
-	  | objNumber == -1 =
-	    do let pd = MPCDb.toDbProvDesign $ PD.readLong designation
-	       -- liftIO $ putStrLn $ "getDiscovObs: objNumber is -1, pd: " ++
-	       --				(show pd)
-	       recs <- select $ (MPCDb.DbRecDbProvDesign ==. Just pd) `orderBy`
-				[Desc MPCDb.DbRecTime]
-	       -- liftIO $ putStrLn $ "Discovery recs: "
-	       -- liftIO $ mapM_ (print . encode . MPCDb.fromDbRec) recs
-	       return $ head recs
-	  | otherwise =
-	    do -- liftIO $ putStrLn $ "getDiscovObs: objNumber is " ++
-	       --				(show objNumber)
-	       recs <- select $ (MPCDb.DbRecObjNumber ==. objNumber) `orderBy`
-				[Desc MPCDb.DbRecTime]
-	       -- liftIO $ putStrLn $ "Discovery recs: "
-	       -- liftIO $ mapM_ (print . encode . MPCDb.fromDbRec) recs
-	       return $ head recs
