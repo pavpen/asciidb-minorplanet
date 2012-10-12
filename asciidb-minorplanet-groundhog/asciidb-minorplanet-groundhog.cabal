@@ -1,0 +1,36 @@
+Name:		asciidb-minorplanet-groundhog
+Version:	0.0.0.1
+Stability:	experimental
+Description:	A data model of the 'asciidb-minorplanet' data types, with
+                conversion functions to store it in a groundhog SQLite
+                database.
+Synopsis:	Parse database files from the Minor Planet Center and the
+                Lowell Observatory
+License:	GPL
+Category:	Data
+Build-Type:	Simple
+Cabal-Version:	>= 1.6
+
+Author:		Pavel M. Penev <pavpen@gmail.com>
+Maintainer:	Pavel M. Penev <pavpen@gmail.com>
+
+Source-Repository head
+  Type:		git
+  Location:	git://github.com/pavpen/asciidb-minorplanet.git
+
+Library
+  Hs-Source-Dirs:	src
+  Exposed-Modules:	Database.Persist.MinorPlanetCenter,
+                        Database.Persist.MinorPlanetCenter.DbTypes,
+                        Database.Persist.MinorPlanetCenter.Selectors
+  Build-Depends:	base,
+                        attoparsec,
+                        binary >= 0.5.1.0,
+                        bytestring >= 0.9.2.1,
+                        monad-loops,
+                        groundhog,
+                        groundhog-th,
+                        groundhog-sqlite,
+                        safe,
+                        time >= 1.4.0.1,
+                        asciidb-minorplanet
