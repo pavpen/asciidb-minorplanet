@@ -1,5 +1,6 @@
-Mid-month updated <NumObs.txt.gz> downleaded on Oct. 10, 2012 had the
-following peruliar sequence of lines (75786601--75786609):
+Mid-month updated <NumObs.txt.gz> downleaded on Oct. 10, 2012 from
+<http://www.minorplanetcenter.net/iau/ECS/MPCAT-OBS/midmonth/NumObs.txt.gz>
+had the following peruliar sequence of lines (75786601--75786609):
 
 N4145K00E70W  C2000 03 21.94290 11 41 50.72 +18 09 20.6          14.1  db2383145
 N4145K00E70W  C2000 03 21.94706 11 41 45.26 +18 11 58.8          14.0  db2383145
@@ -16,3 +17,6 @@ parser to interpret it as the opening of container record.  All subsequent
 records were interpreted as nested within it, which caused a stack overflow
 when its parsing was attempted.  (Of course, there never was a matching 'r'
 line, which makes it an end-of-file error in a smaller file.)
+
+(This problem didn't exist in the earlier version of the mid-month
+<NumObs.txt.gz>, downloaded on Aug. 25)
