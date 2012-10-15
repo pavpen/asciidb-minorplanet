@@ -15,7 +15,6 @@ import Data.Time.Clock			(UTCTime (..), secondsToDiffTime,
 					 diffUTCTime)
 import Data.Time.Clock.POSIX		(utcTimeToPOSIXSeconds)
 import Data.Time.Calendar		(fromGregorian)
-import qualified Database.Persist.MinorPlanetCenter as MPCDb
 import System.Environment		(getProgName, getArgs)
 import System.IO			(stderr, hPutStr, hPutStrLn)
 

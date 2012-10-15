@@ -27,8 +27,8 @@ mProcsRec (rNum, aRec@(rec, MPCObs.Annot {..})) nextARec@(nextRec, _)
   | MPCObs.getDesign rec == MPCObs.getDesign nextRec =
       return (rNum + 1, chosenARec)
   | otherwise = do
-      hPutStr stderr $ (replicate 40 '\b') ++ "Record: " ++ (show rNum) ++
-      		", lines: " ++ (show lineNums)
+      hPutStr stderr $ (replicate 60 '\b') ++ "Record: " ++ (show rNum) ++
+      		", lines: " ++ (show lineNums) ++ (replicate 10 ' ')
       -- LCh8.putStr $ encode rec
       LCh8.putStr $ srcBytes
       return (rNum + 1, nextARec)
@@ -51,6 +51,6 @@ main = do
 	  let (obsRec:restObsRecs) = MPCObs.getAnnotRecs 1 obsBs
 	  (rNum', rec') <- foldM mProcsRec (rNum, obsRec) restObsRecs
 	  hPutStrLn stderr $ (replicate 40 '\b') ++ "Record: " ++ (show rNum')
-	  	++ ". [Done.]"
+	  	++ ". [Done.]          "
 	  LCh8.putStr $ MPCObs.srcBytes $ snd rec'
 	  procsObsFs (rNum' + 1) restFPaths
