@@ -108,7 +108,8 @@ mayGetFloatImplFPWithWidth unitsWidth fracWidth = do
 
 alNumW8Num w8 | w8 >= 48 && w8 <= 57 = w8 - 48	-- '0' to '9'
 	      | w8 >= 65 && w8 <= 90 = w8 - 55	-- 'A' to 'Z'
-	      | otherwise = error $ "Invalid alNum word8: " ++ (show w8)
+	      | otherwise = error $ "alNumW8Num: Invalid alNum word8: " ++
+	      			(show w8)
 
 alNumCh2Num ch = alNumW8Num $ fromEnum ch
 

@@ -98,9 +98,9 @@ main = do
 	hPutStrLn stderr $ "Hi!  " ++ progName ++ " here!"
 	args <- getArgs
 	let (astOrbFPath, obsFPaths) = case args of
-		(path1:rPaths) -> (path1, rPaths)
 		[path]   -> (path, ["../t1-read/NumObs.txt.gz",
 				    "../t1-read/UnnObs.txt.gz"])
+		(path1:rPaths) -> (path1, rPaths)
 		_   -> ("../t1-read/astorb.dat.gz", ["../t1-read/NumObs.txt.gz",
 			"../t1-read/UnnObs.txt.gz"])
 	astOrbBs <- readDecomprFile astOrbFPath

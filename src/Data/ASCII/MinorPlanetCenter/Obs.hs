@@ -160,6 +160,46 @@ getRadarC33_80 = do
 	return (sigTimeDelayMuS, dopplerShiftHz, sigFreqMHzPt1,
 		sigSrcObservatory, obsRfcCode, obsCode)
 
+-- | Read columns 33-80 of the second record of radar observations.
+getRadarRec2C33_80 sigFreqMHzPt1 = do
+	sigReturnPt <- getEnumWord8			  -- Rec. 2, Col. 33
+	sigTimeDelayErrMuS <- mayGetFloatImplFPWithWidth 10 4 -- R.2, Col.34-47
+	dopplerShiftErrHz <- mayGetFloatImplFPWithWidth 11 4  -- R.2, Col.48-62
+	sigFreqMHz <- getDecFracWithWidth' sigFreqMHzPt1 0.001 6 --R2,Col.63-68
+	let sigFreqHz = 1000000 * sigFreqMHz
+	skip 12						  -- Rec. 2, Col. 69-80
+	uncheckedSkip 1 -- Skip the terminating '\n'.
+	return (sigReturnPt, sigTimeDelayErrMuS, dopplerShiftErrHz, sigFreqHz)
+
+-- | Read columns 33-80 of satellite observations.
+getSatC33_80 = do
+	unitsToUse <- getEnumWord8			-- Rec. 2, Col. 33
+	_ <- getWord8					-- Rec. 2, Col. 34
+  	parallaxX <- getFloatWithWidth 11		-- Rec. 2, Col. 35-45
+	_ <- getWord8					-- Rec. 2, Col. 46
+	parallaxY <- getFloatWithWidth 11		-- Rec. 2, Col. 47-57
+	_ <- getWord8					-- Rec. 2, Col. 58
+	parallaxZ <- getFloatWithWidth 11		-- Rec. 2, Col. 59-69
+	let unitF = toSIFactor unitsToUse
+	let parallaxM = (unitF*parallaxX, unitF*parallaxY, unitF*parallaxZ)
+	skip 11					-- Rec. 2, Col. 70-80
+	uncheckedSkip 1 -- Skip the terminating '\n'.
+	return (unitsToUse, parallaxM)
+
+-- | Read columns 33-80 of roving observer observations.
+getRovingObsC33_80 = do
+	skip 2					-- Rec. 2, Col. 33-34
+	lonDeg <- getFloatWithWidth 10		-- Rec. 2, Col. 35-44
+	let lonRad = lonDeg * pi / 180
+	_ <- getWord8				-- Rec. 2, Col. 45
+	latDeg <- getFloatWithWidth 10		-- Rec. 2, Col. 46-55
+	let latRad = latDeg * pi / 180
+	_ <- getWord8				-- Rec. 2, Col. 56
+	altMeters <- readWithWidth 5		-- Rec. 2, Col. 57-61
+	skip 19					-- Rec. 2, Col. 62-80
+	uncheckedSkip 1 -- Skip the terminating '\n'.
+	return (lonRad, latRad, altMeters)
+
 
 putRecObserv (Rec { objNumber
 		  , provDesign
@@ -628,17 +668,9 @@ getRecChunk = do
 
 readAnnotSubRecs32b lnNum expectedNote2 = do
 	bs32 <- getLazyByteString 32
-	return $ runGet (act bs32) bs32
-  where act bs32 = do
-	  objNumber <- getAlNumWithWidthDeflt 5 (-1)	-- Rec. 2, Col.  1- 5
-	  provDesign <- PD.mayGetPacked		-- Rec. 2, Col.  6-12
-	  discoveryBs <- getWord8		-- Rec. 2, Col. 13
-	  let discovery = discoveryBs == 42
-	  note1 <- getEnumWord8			-- Rec. 2, Col. 14
-	  note2W8 <- getWord8			-- Rec. 2, Col. 15
-	  let j2000Adj = note2W8GetJ2000Adj note2W8
-	  time <- getTime			-- Rec. 2, Col. 16-32
-	  if note2W8 == expectedNote2
+	let (objNumber, provDesign, discovery, note1, note2W8, j2000Adj, time) =
+		runGet getC1_32 bs32
+	if note2W8 == expectedNote2
 	   then return ([], lnNum, bs32)
 	   else do (observer, observatory, annot@(Annot {..}), r1) <-
 	   		getAnnotRecChunk2 lnNum note2W8
@@ -653,244 +685,122 @@ getAnnotRecChunk2 :: Int -> Word8
 		-> Get (Observer, Observatory, Annot, [(Rec, Annot)])
 getAnnotRecChunk2 lnNum  82 = do	-- 'R'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  sigTimeDelayMuS <- mayGetFloatImplFPWithWidth 11 4 -- Col. 33-47
-	  dopplerShiftHz <- mayGetFloatImplFPWithWidth 11 4  -- Col. 48-62
-	  sigFreqMHzPt1 <- getFloatImplFPWithWidth 5 1	-- Col. 63-68
-	  sigSrcObsCode <- getTrimmedStrWithWidth 3	-- Col. 69-71
-	  let sigSrcObservatory = ObservatoryCode { obsCode = sigSrcObsCode }
-	  _ <- getWord8					-- Col. 72
-	  obsRfcCode <- getStrWithWidth 5			-- Col. 73-77
-	  obsCode <- getTrimmedStrWithWidth 3		-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
+	let (sigTimeDelayMuS, dopplerShiftHz, sigFreqMHzPt1, sigSrcObservatory,
+	     obsRfcCode, obsCode) = runGet getRadarC33_80 bs49
 	  						-- Rec. 2, Col. 1-32
-	  (subRecs, lnNum', bs2_32) <- readAnnotSubRecs32b (lnNum + 1) 114
-	  bs2_49 <- getLazyByteString 49
-	  return $ runGet ( act' (bs49 `LBS.append` bs2_32 `LBS.append` bs2_49)
-	  		    lnNum' subRecs sigTimeDelayMuS dopplerShiftHz
-			    sigFreqMHzPt1 sigSrcObsCode obsCode)
-		   bs2_49
-	act' bs130 lnNum' subRecs sigTimeDelayMuS dopplerShiftHz sigFreqMHzPt1 sigSrcObsCode obsCode = do
-	  sigReturnPt <- getEnumWord8			-- Rec. 2, Col. 33
-	  sigTimeDelayErrMuS <- mayGetFloatImplFPWithWidth 10 4 -- R.2,Col.34-47
-	  dopplerShiftErrHz <- mayGetFloatImplFPWithWidth 11 4  -- R.2,Col.48-62
-	  sigFreqMHz <- getDecFracWithWidth' sigFreqMHzPt1 0.001 6 --R2,Col63-68
-	  let sigFreqHz = 1000000 * sigFreqMHz
-	  skip 12					-- Rec. 2, Col. 69-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs130
-			    , lineNums = [lnNum, lnNum'] }
-	  return ( RadarObs {..}, ObservatoryCode {..}, annot, subRecs )
+	(subRecs, lnNum', bs2_32) <- readAnnotSubRecs32b (lnNum + 1) 114
+	bs2_49 <- getLazyByteString 49
+	let (sigReturnPt, sigTimeDelayErrMuS, dopplerShiftErrHz, sigFreqHz) =
+		runGet (getRadarRec2C33_80 sigFreqMHzPt1) bs2_49
+	let srcBytes = (bs49 `LBS.append` bs2_32 `LBS.append` bs2_49)
+	let annot = Annot { srcBytes
+			  , lineNums = [lnNum, lnNum'] }
+	return ( RadarObs {..}, sigSrcObservatory, annot, subRecs )
 getAnnotRecChunk2 lnNum  83 = do	-- 'S'
 	bs49 <- getLazyByteString 49
 	let (obsData, obsCode) = runGet getOptC33_80 bs49
 	  						-- Rec. 2, Col.  1-32
 	(subRecs, lnNum', bs2_32) <- readAnnotSubRecs32b (lnNum + 1) 115
 	bs2_49 <- getLazyByteString 49
-	return $ runGet ( act' (bs49 `LBS.append` bs2_32 `LBS.append` bs2_49)
-	  		  lnNum' subRecs obsData obsCode )
-		 bs2_49
-  where	act' bs130 lnNum' subRecs obsData obsCode = do
-	  unitsToUse <- getEnumWord8			-- Rec. 2, Col. 33
-	  _ <- getWord8					-- Rec. 2, Col. 34
-  	  parallaxX <- getFloatWithWidth 11		-- Rec. 2, Col. 35-45
-	  _ <- getWord8					-- Rec. 2, Col. 46
-	  parallaxY <- getFloatWithWidth 11		-- Rec. 2, Col. 47-57
-	  _ <- getWord8					-- Rec. 2, Col. 58
-	  parallaxZ <- getFloatWithWidth 11		-- Rec. 2, Col. 59-69
-	  let unitF = toSIFactor unitsToUse
-	  let parallaxM = (unitF*parallaxX, unitF*parallaxY, unitF*parallaxZ)
-	  skip 11					-- Rec. 2, Col. 70-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs130
-			    , lineNums = [lnNum, lnNum'] }
-	  return ( SatelliteObs {..}, ObservatoryCode {..}, annot, subRecs )
+	let (unitsToUse, parallaxM) = runGet getSatC33_80 bs2_49
+	let srcBytes = (bs49 `LBS.append` bs2_32 `LBS.append` bs2_49)
+	let annot = Annot { srcBytes
+			  , lineNums = [lnNum, lnNum'] }
+	return ( SatelliteObs {..}, ObservatoryCode {..}, annot, subRecs )
 getAnnotRecChunk2 lnNum  86 = do	-- 'V'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3		-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
 							-- Rec. 2, Col. 1-32:
-	  (subRecs, lnNum', bs2_32) <- readAnnotSubRecs32b (lnNum + 1) 118
-	  bs2_49 <- getLazyByteString 49
-	  return $ runGet ( act' (bs49 `LBS.append` bs2_32 `LBS.append` bs2_49)
-	  		    lnNum' subRecs obsData obsCode )
-		   bs2_49
-	act' bs130 lnNum' subRecs obsData obsCode = do
-	  skip 2					-- Rec. 2, Col. 33-34
-	  lonDeg <- getFloatWithWidth 10		-- Rec. 2, Col. 35-44
-	  let lonRad = lonDeg * pi / 180
-	  _ <- getWord8					-- Rec. 2, Col. 45
-	  latDeg <- getFloatWithWidth 10		-- Rec. 2, Col. 46-55
-	  let latRad = latDeg * pi / 180
-	  _ <- getWord8					-- Rec. 2, Col. 56
-	  altMeters <- readWithWidth 5			-- Rec. 2, Col. 57-61
-	  skip 19					-- Rec. 2, Col. 62-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs130
-			    , lineNums = [lnNum, lnNum'] }
-	  return (RovingObserverObs {..}, RovingObserver { .. }, annot, subRecs)
+	(subRecs, lnNum', bs2_32) <- readAnnotSubRecs32b (lnNum + 1) 118
+	bs2_49 <- getLazyByteString 49
+	let (lonRad, latRad, altMeters) = runGet getRovingObsC33_80 bs2_49
+	let srcBytes = bs49 `LBS.append` bs2_32 `LBS.append` bs2_49
+	let annot = Annot { srcBytes, lineNums = [lnNum, lnNum'] }
+	return (RovingObserverObs {..}, RovingObserver { .. }, annot, subRecs)
 getAnnotRecChunk2 lnNum  65 = do	-- 'A'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return ( OpticalObs {..}, ObservatoryCode {..}, annot, [] )
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return ( OpticalObs {..}, ObservatoryCode {..}, annot, [] )
 getAnnotRecChunk2 lnNum  32 = do	-- ' ' (default)
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return ( PhotographicObs {..}, ObservatoryCode {..}, annot, [] )
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return ( PhotographicObs {..}, ObservatoryCode {..}, annot, [] )
 getAnnotRecChunk2 lnNum  80 = do	-- 'P'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return ( PhotographicObs {..}, ObservatoryCode {..}, annot, [] )
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return ( PhotographicObs {..}, ObservatoryCode {..}, annot, [] )
 getAnnotRecChunk2 lnNum 101 = do	-- 'e'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return ( EncoderObs {..}, ObservatoryCode {..}, annot, [] )
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return ( EncoderObs {..}, ObservatoryCode {..}, annot, [] )
 getAnnotRecChunk2 lnNum  67 = do	-- 'C'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return ( CCDObs {..}, ObservatoryCode {..}, annot, [] )
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return ( CCDObs {..}, ObservatoryCode {..}, annot, [] )
 getAnnotRecChunk2 lnNum  84 = do	-- 'T'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return (MeridianOrTransitCircObs {..}, ObservatoryCode {..}, annot,[])
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return (MeridianOrTransitCircObs {..}, ObservatoryCode {..}, annot,[])
 getAnnotRecChunk2 lnNum  77 = do	-- 'M'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return ( MicrometerObs {..}, ObservatoryCode {..}, annot, [] )
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return ( MicrometerObs {..}, ObservatoryCode {..}, annot, [] )
 getAnnotRecChunk2 lnNum  99 = do	-- 'c'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return ( CorrectedWithoutRepubCCDObs {..}, ObservatoryCode {..},
-	  	   annot, [] )
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return ( CorrectedWithoutRepubCCDObs {..}, ObservatoryCode {..}, annot,
+		 [] )
 getAnnotRecChunk2 lnNum  69 = do	-- 'E'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return ( OccultationDerivObs {..}, ObservatoryCode {..}, annot, [] )
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return ( OccultationDerivObs {..}, ObservatoryCode {..}, annot, [] )
 getAnnotRecChunk2 lnNum  79 = do	-- 'O'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return ( OffsetObs {..}, ObservatoryCode {..}, annot, [] )
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return ( OffsetObs {..}, ObservatoryCode {..}, annot, [] )
 getAnnotRecChunk2 lnNum  72 = do	-- 'H'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return ( HipparcosObs {..}, ObservatoryCode {..}, annot, [] )
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return ( HipparcosObs {..}, ObservatoryCode {..}, annot, [] )
 getAnnotRecChunk2 lnNum  78 = do	-- 'N'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return ( NormalPlaceObs {..}, ObservatoryCode {..}, annot, [] )
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return ( NormalPlaceObs {..}, ObservatoryCode {..}, annot, [] )
 getAnnotRecChunk2 lnNum 110 = do	-- 'n'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return ( VideoFrmAvgObs {..}, ObservatoryCode {..}, annot, [] )
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return ( VideoFrmAvgObs {..}, ObservatoryCode {..}, annot, [] )
 getAnnotRecChunk2 lnNum  88 = do	-- 'X'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return (ReplacedObs {obsData,lowercaseX=False}, ObservatoryCode {..},
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return (ReplacedObs {obsData,lowercaseX=False}, ObservatoryCode {..},
 	  	  annot, [])
 getAnnotRecChunk2 lnNum 120 = do	-- 'x'
 	bs49 <- getLazyByteString 49
-	return $ runGet (act bs49) bs49
-  where act bs49 = do
-	  obsData <- getObsData
-	  obsCode <- getTrimmedStrWithWidth 3	-- Col. 78-80
-	  uncheckedSkip 1 -- Skip the terminating '\n'.
-	  let annot = Annot { srcBytes = bs49
-			    , lineNums = [lnNum] }
-	  return (ReplacedObs {obsData,lowercaseX=True }, ObservatoryCode {..},
+	let (obsData, obsCode) = runGet getOptC33_80 bs49
+	let annot = Annot { srcBytes = bs49, lineNums = [lnNum] }
+	return (ReplacedObs {obsData,lowercaseX=True }, ObservatoryCode {..},
 		  annot, [])
-getAnnotRecChunk2 lnNum x = error $ "Unrecognized note2 value: " ++ (show x)
+getAnnotRecChunk2 lnNum x =
+	error $ "getAnnotRecChunk2: Unrecognized note2 value: " ++ (show x)
 
 
 
--- | Like 'getRecChunk', but get each records with an annotation ('Annot')
+-- | Like 'getRecChunk', but get each record with an annotation ('Annot')
 --   associated with it.
 getAnnotRecChunk lnNum = do
 	bs32 <- getLazyByteString 32
@@ -903,13 +813,15 @@ getAnnotRecChunk lnNum = do
 
 
 
+-- | Decode a lazy ByteString into a list of records.
 getRecs :: LBS.ByteString -> [Rec]
-getRecs bs =
-	if LBS.null bs
-	  then []
-	  else let (recs, restBs, ofs) = runGetState getRecChunk bs 0
-	       in recs ++ (getRecs restBs)
+getRecs bs | LBS.null bs = []
+	   | otherwise = let (recs, restBs, ofs) = runGetState getRecChunk bs 0
+			 in recs ++ (getRecs restBs)
 
+-- | Decode a lazy ByteString into a list of annotated records.
+--
+--   'lnNum' = line number at the beginning of the ByteString 'bs'.
 getAnnotRecs :: Int -> LBS.ByteString -> [(Rec, Annot)]
 getAnnotRecs lnNum bs
   | LBS.null bs = []
@@ -918,15 +830,3 @@ getAnnotRecs lnNum bs
 	    (_, Annot { lineNums }) = head recs
   	    lnNum' = 1 + (last $ lineNums)
 	in recs ++ (getAnnotRecs lnNum' restBs)
-
-{-
-getMayRecs :: LBS.ByteString -> [Rec]
-getMayRecs bs =
-	case LBS.null bs of
-	  True -> []
-	  _    -> let (rec, recTail) = LBS.splitAt chunkSize bs
-	  	      recsTail = getMayRecs recTail
-	          in maybe recsTail
-		  	   (\rec -> rec:(recsTail))
-			   (runGet mayGetRec bs)
--}

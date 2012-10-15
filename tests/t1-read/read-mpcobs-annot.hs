@@ -22,7 +22,7 @@ main = do
 	let decompressor | ".gz" `isSuffixOf` inpFPath = decompress
 			 | otherwise = id
 	bs <- LBS.readFile inpFPath
-	putStrLn $ show $ runGet (MPCObs.getAnnotRecChunk 1) bs
+	putStrLn $ show $ runGet (MPCObs.getAnnotRecChunk 1) $ decompressor bs
 	putStrLn $ "Reading: " ++ inpFPath
 	putStrLn ""
 	mapM_ procsAnnotRec (MPCObs.getAnnotRecs 1 $ decompressor bs)
