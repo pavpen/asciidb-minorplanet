@@ -40,7 +40,7 @@ module Data.ASCII.MinorPlanetCenter.Obs
   , getRecChunk
   , getAnnotRecs
   , getAnnotRecChunk
-  , module Data.ASCII.MinorPlanetCenter.Obj
+  , module Data.ASCII.MinorPlanetCenter.Design
   , module Data.ASCII.MinorPlanetCenter.Observer
   , module Data.ASCII.MinorPlanetCenter.Observatory
   , module Data.ASCII.MinorPlanetCenter.ProvisionalDesignations
@@ -67,7 +67,7 @@ import Data.ASCII.Get		(readWithWidth, readWithWidthDeflt,
 				 getFloatWithWidth, getFloatImplFPWithWidth,
 				 mayGetFloatImplFPWithWidth,
 				 getDecFracWithWidth', getAlNumWithWidthDeflt)
-import Data.ASCII.MinorPlanetCenter.Obj
+import Data.ASCII.MinorPlanetCenter.Design
 				(Design (..), Designatable (..))
 import Data.ASCII.MinorPlanetCenter.Observer
 				(Observer (..), ObsData (..),

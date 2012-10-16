@@ -63,7 +63,7 @@ import Data.ASCII.LowellObservatory.ObjObservations
 				(ObjObservations (..), getObjObservations)
 import Data.ASCII.LowellObservatory.ObjDiscoverers
 				(ObjDiscoverers (..), getObjDiscoverers)
-import Data.ASCII.MinorPlanetCenter.Obj
+import Data.ASCII.MinorPlanetCenter.Design
 				(Design (..), Designatable (..))
 import qualified Data.ASCII.MinorPlanetCenter.ProvisionalDesignations as PD
 import Data.ASCII.Put		(putFloatWithWidth, putJulianYYYYMMDD)

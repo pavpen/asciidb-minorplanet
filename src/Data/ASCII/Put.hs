@@ -47,6 +47,9 @@ num2AlNumW8 n | n >= 0 && n <= 9 = n + 48	-- '0' to '9'
 	      | n >= 10 && n <= 35 = n + 55	-- 'A' to 'Z'
 	      | otherwise = error $ "AlNum digit out of range: " ++ (show n)
 
+num2AlNumCh :: Int -> Char
+num2AlNumCh = toEnum . num2AlNumW8
+
 putAlNumWithWidth width num | width < 1 = return ()
 			    | otherwise = do	
 	let dgtFactor = 10 ^ (width - 1)

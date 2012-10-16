@@ -25,6 +25,7 @@
 
 module Data.ASCII.MinorPlanetCenter.Util where
 
+import Data.ASCII.Put		(num2AlNumCh)
 import Data.Binary.Get		(getBytes, getWord8)
 import Data.Binary.Put		(Put (..), putByteString, putWord8)
 import qualified Data.ByteString.Char8 as Ch8
@@ -32,6 +33,7 @@ import Data.Time		(UTCTime (..), fromGregorian, toGregorian,
 				 picosecondsToDiffTime)
 import Text.Printf		(printf)
 import Safe			(readMay)
+
 
 
 -- | Read time ('date of observation') as specified by the Minor Planet Center.
@@ -166,3 +168,14 @@ putDeclRad angRad = do
 	remMin = remSec `div` 60
 	min = remMin `mod` 60
 	deg = remMin `div` 60
+
+toAlNumStrWithWidth width num
+  | width < 1 = []
+  | otherwise =    
+	let dgtFactor = 10 ^ (width - 1)
+	    (dgt, remNum) = num `divMod` dgtFactor
+	in (num2AlNumCh dgt):(restDgts remNum (dgtFactor `div` 10) (width - 1))
+  where restDgts _ _ 0               = []
+	restDgts num dgtFactor width =
+	  let (dgt, remNum) = num `divMod` dgtFactor
+	  in (num2AlNumCh dgt):(restDgts remNum (dgtFactor `div` 10) (width-1))

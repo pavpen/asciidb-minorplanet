@@ -2,20 +2,22 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      : Data.ASCII.MinorPlanetCenter.Obj
+-- Module      : Data.ASCII.MinorPlanetCenter.Design
 -- Copyright   : 2012 Pavel M. Penev
 -- License     : GPL
 --
 -- Maintainer  : Pavel Penev <pavpen@gmail.com>
 -- Stability   : experimental
 --
--- Definitions common to minor planets and comets.
+-- Minor planet and comet designations.
 --
 -----------------------------------------------------------------------------
 
-module Data.ASCII.MinorPlanetCenter.Obj where
+module Data.ASCII.MinorPlanetCenter.Design where
 
 import qualified Data.ASCII.MinorPlanetCenter.ProvisionalDesignations as PD
+import Data.ASCII.MinorPlanetCenter.Util
+				(toAlNumStrWithWidth)
 
 
 data Design = DesignNum Int
@@ -24,3 +26,11 @@ data Design = DesignNum Int
 
 class Designatable obj where
   getDesign :: obj -> Design
+
+showLong :: Design -> String
+showLong (DesignNum n) = (show n)
+showLong (DesignProv pd) = PD.showLong pd
+
+showPacked :: Design -> String
+showPacked (DesignNum n) = toAlNumStrWithWidth 5 n
+showPacked (DesignProv pd) = PD.showPacked pd
