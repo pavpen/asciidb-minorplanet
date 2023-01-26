@@ -16,8 +16,8 @@ Observatory's asteroid orbits database
 should be supported fairly well.
 
 The creation and maintenance of this package has nothing to do with the Minor
-Planet Center, the Lowell Observatory, or NASA.  It was written for [LaRouche
-PAC](http://larouchepac.com/), and the LaRouche Policy Institute.
+Planet Center, the Lowell Observatory, or NASA.  It was written for the former LaRouche
+PAC, and the LaRouche Policy Institute.
 
 
 # Reading Examples
