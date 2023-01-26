@@ -3,7 +3,7 @@ asciidb-minorplanet
 
 (C) 2012 Pavel M. Penev
 
-License: GPL
+License: BSD-3
 
 Haskell functionality for reading and writing ASCII minor planet (e.g.
 asteroid) databases.
